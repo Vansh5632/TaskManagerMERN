@@ -1,31 +1,63 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaCheck } from "react-icons/fa";
+import axios from 'axios';
 
 const App = () => {
   const [input, setInput] = useState("");
   const [tasks, setTasks] = useState([]);
 
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/tasks');
+        setTasks(response.data);
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      }
+    };
+    fetchTasks();
+  }, []);
+
   const handleChange = (event) => {
     setInput(event.target.value);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (input.trim()) {
-      setTasks([...tasks, { text: input, completed: false }]);
-      setInput("");
+      try {
+        const newTask = { text: input, completed: false };
+        const response = await axios.post('http://localhost:5000/api/tasks', newTask);
+        setTasks([...tasks, response.data]);
+        setInput("");
+      } catch (error) {
+        console.error("Error submitting task:", error);
+      }
     }
   };
 
-  const handleComplete = (index) => {
-    const newTasks = tasks.map((task, i) => 
-      i === index ? { ...task, completed: !task.completed } : task
-    );
-    setTasks(newTasks);
+  const handleComplete = async (index) => {
+    const task = tasks[index];
+    const updatedTask = { ...task, completed: !task.completed };
+
+    try {
+      await axios.put(`http://localhost:5000/api/tasks/${task._id}`, updatedTask);
+      const newTasks = tasks.map((task, i) => (i === index ? updatedTask : task));
+      setTasks(newTasks);
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
   };
 
-  const handleDelete = (index) => {
-    const newTasks = tasks.filter((task, i) => i !== index);
-    setTasks(newTasks);
+  const handleDelete = async (index) => {
+    const task = tasks[index];
+
+    try {
+      await axios.delete(`http://localhost:5000/api/tasks/${task._id}`);
+      const newTasks = tasks.filter((_, i) => i !== index);
+      setTasks(newTasks);
+    } catch (error) {
+      console.error("Error deleting task:", error);
+    }
   };
 
   return (
