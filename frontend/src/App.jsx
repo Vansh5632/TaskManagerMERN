@@ -5,52 +5,39 @@ import axios from 'axios';
 const App = () => {
   const [input, setInput] = useState(""); // State to store input value
   const [tasks, setTasks] = useState([]); // State to store tasks
-  const [name,setName] = useState(""); 
-  const [userName,setUserName] = useState("");
+  const [name, setName] = useState("");
+  const [userName, setUserName] = useState("");
 
-  // useEffect(() => {
-  //   // Fetch tasks from the server
-  //   const fetchTasks = async () => {
-  //     try {
-  //       const response = await axios.get('http://localhost:5000/api/tasks');
-  //       setTasks(response.data);
-  //     } catch (error) {
-  //       console.error("Error fetching tasks:", error);
-  //     }
-  //   };
-  //   fetchTasks();
-  // }, []);
-
-  useEffect(()=>{
-    if(userName){
-      const fetchTasks = async()=>{
-        try{
+  useEffect(() => {
+    if (userName) {
+      const fetchTasks = async () => {
+        try {
           const response = await axios.get(`http://localhost:5000/api/tasks?name=${userName}`);
           setTasks(response.data);
-        }catch(error){
+        } catch (error) {
           console.log("error fetching task");
         }
       };
       fetchTasks();
     }
-  },[userName]);
+  }, [userName]);
 
   const handleChange = (event) => {
     setInput(event.target.value); // Update input value on change
   };
 
-  const handleNameChange = (event)=>{
+  const handleNameChange = (event) => {
     setName(event.target.value);
   }
 
-  const handleNameSubmit=()=>{
+  const handleNameSubmit = () => {
     setUserName(name);
   }
 
   const handleSubmit = async () => {
     if (input.trim() && userName) {
       try {
-        const newTask = { text: input, completed: false,name: userName };
+        const newTask = { text: input, completed: false, name: userName };
         const response = await axios.post('http://localhost:5000/api/tasks', newTask);
         setTasks([...tasks, response.data]); // Add new task to the tasks array
         setInput(""); // Clear input value
@@ -87,33 +74,33 @@ const App = () => {
 
   return (
     <div className='flex items-start justify-center text-center bg-[#003049] w-screen h-screen pt-[100px]'>
-      <div className='flex flex-col items-center bg-[#f77f00] w-[40%] min-h-fit p-7 rounded-lg text-center'>
+      <div className='flex flex-col items-center bg-[#f77f00] w-[90%] max-w-[600px] min-h-fit p-7 rounded-lg text-center'>
         <h1 className='font-bold text-[50px] text-[#eae2b7] tracking-wide'>Task Manager</h1>
         <div className='flex p-5'>
-          <input 
-            type="text" 
-            placeholder='Enter your name' 
-            value={name} 
-            onChange={handleNameChange} 
+          <input
+            type="text"
+            placeholder='Enter your name'
+            value={name}
+            onChange={handleNameChange}
             className='bg-[#313131] mx-2 w-[300px] p-2 rounded-lg text-white'
           />
-          <button 
-            onClick={handleNameSubmit} 
+          <button
+            onClick={handleNameSubmit}
             className='bg-[#fcbf49] text-white px-4 py-2 rounded-lg'
           >
             Submit
           </button>
         </div>
         <div className='flex p-5'>
-          <input 
-            type="text" 
-            placeholder='eg: write code' 
-            value={input} 
-            onChange={handleChange} 
+          <input
+            type="text"
+            placeholder='eg: write code'
+            value={input}
+            onChange={handleChange}
             className='bg-[#313131] mx-2 w-[300px] p-2 rounded-lg text-white'
           />
-          <button 
-            onClick={handleSubmit} 
+          <button
+            onClick={handleSubmit}
             className='bg-[#fcbf49] text-white px-4 py-2 rounded-lg'
           >
             Submit
@@ -122,8 +109,9 @@ const App = () => {
         <div className='w-full mt-5'>
           {tasks.map((task, index) => (
             <div key={index} className='flex items-center justify-between mb-2 border-t-2 border-b-2 border-[#003049] text-[30px]'>
+              <p className='text-[#eae2b7]'>{index + 1}.</p> {/* Serial number */}
               <button onClick={() => handleComplete(index)}>
-                <FaCheck className='text-[#fcbf49]'/>
+                <FaCheck className='text-[#fcbf49]' />
               </button>
               <p className={`text-[#eae2b7] ${task.completed ? 'line-through decoration-black' : ''}`}>
                 {task.text}
