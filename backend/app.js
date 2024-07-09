@@ -19,26 +19,40 @@ db.once('open', () => {
   console.log('Connected to MongoDB');
 });
 
+// Define the task schema
 const taskSchema = new mongoose.Schema({
   text: String,
   completed: Boolean,
+  name:String
 });
 
+// Create a Task model based on the task schema
 const Task = mongoose.model('Task', taskSchema);
 
-app.get('/api/tasks', async (req, res) => {
-  try {
-    const tasks = await Task.find();
+// Get all tasks
+// app.get('/api/tasks', async (req, res) => {
+//   try {
+//     const tasks = await Task.find();
+//     res.json(tasks);
+//   } catch (error) {
+//     res.status(500).json({ message: 'Error fetching tasks' });
+//   }
+// });
+app.get('/api/tasks',async(req,res)=>{
+  try{
+    const {name} = req.query;
+    const tasks = name? await Task.find({name}): await Task.find();
     res.json(tasks);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching tasks' });
+  }catch(error){
+    res.status(500).send('server error');
   }
-});
+})
 
+// Create a new task
 app.post('/api/tasks', async (req, res) => {
-  const { text, completed } = req.body;
+  const { text, completed ,name} = req.body;
   try {
-    const newTask = new Task({ text, completed });
+    const newTask = new Task({ text, completed,name });
     await newTask.save();
     res.status(201).json(newTask);
   } catch (error) {
@@ -46,6 +60,7 @@ app.post('/api/tasks', async (req, res) => {
   }
 });
 
+// Update a task
 app.put('/api/tasks/:id', async (req, res) => {
   const { id } = req.params;
   const { text, completed } = req.body;
@@ -57,6 +72,7 @@ app.put('/api/tasks/:id', async (req, res) => {
   }
 });
 
+// Delete a task
 app.delete('/api/tasks/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -67,6 +83,7 @@ app.delete('/api/tasks/:id', async (req, res) => {
   }
 });
 
+// Start the server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
